@@ -27,7 +27,7 @@ export const useSocket = (): SocketContextType => {
     return context
 }
 
-const BACKEND_URL ="http://localhost:5050"
+const BACKEND_URL=import.meta.env.BASE_URL
 
 const SocketProvider = ({ children }: { children: ReactNode }) => {
     const {
