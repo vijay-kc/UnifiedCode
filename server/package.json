@@ -1,10 +1,10 @@
 {
   "name": "unifiedcode-server",
   "version": "1.0.0",
-  "main": "dist/server.js",
+  "main": "src/server.ts",
   "scripts": {
 		"dev": "nodemon --exec ts-node src/server.ts",
-		"start": "node dist/server.js",
+		"start": "node src/server.ts",
 		"build": "tsc"
 	},
   "author": "vijay kumar chaurasiya",
