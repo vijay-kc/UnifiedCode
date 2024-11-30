@@ -17,6 +17,7 @@ import { toast } from "react-hot-toast"
 import { Socket, io } from "socket.io-client"
 import { useAppContext } from "./AppContext"
 
+
 const SocketContext = createContext<SocketContextType | null>(null)
 
 export const useSocket = (): SocketContextType => {
@@ -27,8 +28,8 @@ export const useSocket = (): SocketContextType => {
     return context
 }
 
-const BACKEND_URL=import.meta.env.BASE_URL
-
+const BACKEND_URL=import.meta.env.VITE_BACKEND_URL
+  
 const SocketProvider = ({ children }: { children: ReactNode }) => {
     const {
         users,
