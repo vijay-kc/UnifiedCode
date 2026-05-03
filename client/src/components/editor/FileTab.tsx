@@ -8,6 +8,17 @@ import customMapping from "@/utils/customMapping"
 import { useSettings } from "@/context/SettingContext"
 import langMap from "lang-map"
 
+const normalizeLanguageName = (language: string) => {
+    const normalized = language.toLowerCase().trim()
+    if (normalized === "c++") return "cpp"
+    if (normalized === "c#") return "csharp"
+    if (normalized === "f#") return "fsharp"
+    if (normalized === "objective-c") return "objectiveC"
+    if (normalized === "objective-cpp" || normalized === "objective-c++") return "objectiveCpp"
+    if (normalized === "plain text") return "text"
+    return normalized.replace(/\s+/g, "").replace(/\+/g, "plus").replace(/#/g, "sharp")
+}
+
 function FileTab() {
     const {
         openFiles,
@@ -53,7 +64,6 @@ function FileTab() {
     // Update the editor language when a file is opened
     useEffect(() => {
         if (activeFile?.name === undefined) return
-        // Get file extension on file open and set language when file is opened
         const extension = activeFile.name.split(".").pop()
         if (!extension) return
 
@@ -63,8 +73,11 @@ function FileTab() {
             return
         }
 
-        const language = langMap.languages(extension)
-        setLanguage(language[0])
+        const languages = langMap.languages(extension)
+        if (languages.length === 0) return
+
+        const normalizedLanguage = normalizeLanguageName(languages[0])
+        setLanguage(normalizedLanguage)
     }, [activeFile?.name, setLanguage])
 
     return (

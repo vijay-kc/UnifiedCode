@@ -1,8 +1,9 @@
 import axios, { AxiosInstance } from "axios"
 
-const BaseUrl ="https://emkc.org/api/v2/piston"
-// GET  https://emkc.org/api/v2/piston/runtimes
-// POST https://emkc.org/api/v2/piston/execute
+const BaseUrl ="http://localhost:5050/api"
+// GET  http://localhost:5050/api/languages
+// POST http://localhost:5050/api/submissions
+// GET  http://localhost:5050/api/submissions/{token}
 
 
 const instance: AxiosInstance = axios.create({

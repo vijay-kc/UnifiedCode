@@ -18,8 +18,9 @@ function RunView() {
     } = useRunCode()
 
     const handleLanguageChange = (e: ChangeEvent<HTMLSelectElement>) => {
-        const lang = JSON.parse(e.target.value)
-        setSelectedLanguage(lang)
+        const selectedId = Number(e.target.value)
+        const lang = supportedLanguages.find((item) => item.id === selectedId)
+        if (lang) setSelectedLanguage(lang)
     }
 
     const copyOutput = () => {
@@ -37,21 +38,15 @@ function RunView() {
                 <div className="relative w-full">
                     <select
                         className="w-full rounded-md border-none bg-darkHover px-4 py-2 text-white outline-none"
-                        value={JSON.stringify(selectedLanguage)}
+                        value={selectedLanguage.id}
                         onChange={handleLanguageChange}
                     >
                         {supportedLanguages
-                            .sort((a, b) => (a.language > b.language ? 1 : -1))
-                            .map((lang, i) => {
+                            .sort((a, b) => (a.name > b.name ? 1 : -1))
+                            .map((lang) => {
                                 return (
-                                    <option
-                                        key={i}
-                                        value={JSON.stringify(lang)}
-                                    >
-                                        {lang.language +
-                                            (lang.version
-                                                ? ` (${lang.version})`
-                                                : "")}
+                                    <option key={lang.id} value={lang.id}>
+                                        {lang.name}
                                     </option>
                                 )
                             })}

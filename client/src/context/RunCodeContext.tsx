@@ -30,16 +30,17 @@ const RunCodeContextProvider = ({ children }: { children: ReactNode }) => {
     const [isRunning, setIsRunning] = useState<boolean>(false)
     const [supportedLanguages, setSupportedLanguages] = useState<Language[]>([])
     const [selectedLanguage, setSelectedLanguage] = useState<Language>({
-        language: "",
-        version: "",
-        aliases: [],
+        id: 0,
+        name: "",
+        is_archived: false,
+        source_file: "",
     })
 
     useEffect(() => {
         const fetchSupportedLanguages = async () => {
             try {
                 console.log("enter")
-                const languages = await axiosInstance.get("/runtimes")
+                const languages = await axiosInstance.get("/languages")
                 setSupportedLanguages(languages.data)
 
             } catch (error: any) {
@@ -51,25 +52,30 @@ const RunCodeContextProvider = ({ children }: { children: ReactNode }) => {
         fetchSupportedLanguages()
     }, [])
 
-    // Set the selected language based on the file extension
+    // Set the selected language based on the file extension or default to the first supported language
     useEffect(() => {
-        if (supportedLanguages.length === 0 || !activeFile?.name) return
+        if (supportedLanguages.length === 0) return
 
-        const extension = activeFile.name.split(".").pop()
+        const extension = activeFile?.name?.split(".").pop()
         if (extension) {
             const languageName = langMap.languages(extension)
-            const language = supportedLanguages.find(
-                (lang) =>
-                    lang.aliases.includes(extension) ||
-                    languageName.includes(lang.language.toLowerCase()),
+            const matchedLanguage = supportedLanguages.find((lang) =>
+                languageName.some((name) => lang.name.toLowerCase().includes(name)),
             )
-            if (language) setSelectedLanguage(language)
-        } else setSelectedLanguage({ language: "", version: "", aliases: [] })
-    }, [activeFile?.name, supportedLanguages])
+            if (matchedLanguage) {
+                setSelectedLanguage(matchedLanguage)
+                return
+            }
+        }
+
+        if (selectedLanguage.id === 0) {
+            setSelectedLanguage(supportedLanguages[0])
+        }
+    }, [activeFile?.name, supportedLanguages, selectedLanguage.id])
 
     const runCode = async () => {
         try {
-            if (!selectedLanguage) {
+            if (!selectedLanguage || selectedLanguage.id === 0) {
                 return toast.error("Please select a language to run the code")
             } else if (!activeFile) {
                 return toast.error("Please open a file to run the code")
@@ -78,18 +84,26 @@ const RunCodeContextProvider = ({ children }: { children: ReactNode }) => {
             }
 
             setIsRunning(true)
-            const { language, version } = selectedLanguage
 
-            const response = await axiosInstance.post("/execute", {
-                language,
-                version,
-                files: [{ name: activeFile.name, content: activeFile.content }],
+            const response = await axiosInstance.post("/submissions", {
+                source_code: activeFile.content,
+                language_id: selectedLanguage.id,
                 stdin: input,
             })
-            if (response.data.run.stderr) {
-                setOutput(response.data.run.stderr)
+            const token = response.data.token
+
+            // Poll for result
+            let result
+            do {
+                await new Promise(resolve => setTimeout(resolve, 1000))
+                const res = await axiosInstance.get(`/submissions/${token}`)
+                result = res.data
+            } while (result.status.id <= 2) // 1=In Queue, 2=Processing
+
+            if (result.stderr) {
+                setOutput(result.stderr)
             } else {
-                setOutput(response.data.run.stdout)
+                setOutput(result.stdout)
             }
             setIsRunning(false)
             toast.dismiss()

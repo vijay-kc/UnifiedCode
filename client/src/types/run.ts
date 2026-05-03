@@ -1,7 +1,8 @@
 interface Language {
-    language: string
-    version: string
-    aliases: string[]
+    id: number
+    name: string
+    is_archived: boolean
+    source_file: string
 }
 
 interface RunContext {
