@@ -7,7 +7,7 @@ function Footer() {
                     href="https://github.com/vijay-kc"
                     className="text-st no-underline"
                 >
-                    vijay kumar chaurasiya
+                   Team Nexus
                 </a>
             </span>
         </footer>
